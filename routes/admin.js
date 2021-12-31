@@ -14,7 +14,10 @@ const { registerDoctor,
     DeviceCert,
     devicetelemetry,
     forwardtelemetry,
-    getDeviceData
+    getDeviceData,
+    addDevice,
+    updateDevice,
+    getDevice
 } = require('../controller/Admin/adminController');
 const { loginDoctor } = require('../controller/Doctor/authController');
 const { registerPatient } = require('../controller/Doctor/doctorController');
@@ -38,6 +41,13 @@ router.post('/DeviceCert', DeviceCert);
 router.post('/devicetelemetry/:deviceparam', devicetelemetry);
 router.post('/forwardtelemetry', forwardtelemetry);
 router.post('/devicedata', getDeviceData);
+
+//devices
+router.post('/device/add', addDevice);
+router.post('/device/update/:deviceId', updateDevice);
+router.get('/device/get/:deviceId',getDevice)
+
+
 
 
 
