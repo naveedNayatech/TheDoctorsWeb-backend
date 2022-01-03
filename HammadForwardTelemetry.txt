@@ -1,0 +1,17 @@
+exports.devicetelemetry = async (req, res) => {
+    try {
+        console.log(req.params.deviceparam);
+        console.log(req.body);
+        
+        let FindPatient = await Patient.findOne({ deviceid: req.params.deviceparam }).lean()
+        console.log(FindPatient);
+
+        let insertIntoDeviceData = await deviceData.create({ patientId: FindPatient._id, deviceId: req.params.deviceparam, telemetaryData: req.body })
+        console.log(insertIntoDeviceData);
+
+        res.status(200).send("data recieved  " + JSON.stringify(req.body));
+    }
+    catch (err) {
+        console.log(err)
+    }
+};

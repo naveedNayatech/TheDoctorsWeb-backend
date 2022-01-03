@@ -17,7 +17,8 @@ const { registerDoctor,
     getDeviceData,
     addDevice,
     updateDevice,
-    getDevice
+    getDeviceDetails,
+    devicesList
 } = require('../controller/Admin/adminController');
 const { loginDoctor } = require('../controller/Doctor/authController');
 const { registerPatient } = require('../controller/Doctor/doctorController');
@@ -45,7 +46,8 @@ router.post('/devicedata', getDeviceData);
 //devices
 router.post('/device/add', addDevice);
 router.post('/device/update/:deviceId', updateDevice);
-router.get('/device/get/:deviceId',getDevice)
+router.post('/device',getDeviceDetails);
+router.get('/devices',devicesList);
 
 
 

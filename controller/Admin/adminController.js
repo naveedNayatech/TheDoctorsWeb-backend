@@ -275,7 +275,7 @@ exports.DeviceCert = async (req, res) => {
 exports.devicetelemetry = async (req, res) => {
     try {
         console.log(req.params.deviceparam)
-        console.log(req.body)
+        console.log(req.body);
         let FindPatient = await Patient.findOne({ deviceid: req.params.deviceparam }).lean()
         console.log(FindPatient);
 
@@ -299,17 +299,32 @@ exports.getDeviceData = catchAsyncError(async (req, res, next) => {
     try {
         const { deviceId, patientId } = req.body;
 
-        if (!deviceId || !patientId) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid DeviceId or PatientId'
-            })
+        let data;
+
+        if(deviceId === null) {
+             data = await deviceData.find({
+                patientId: patientId
+            }).sort({ _id: -1 });
+        } else {
+            data = await deviceData.find({
+                deviceId: deviceId,
+                patientId: patientId
+            }).sort({ _id: -1 });
         }
 
-        const data = await deviceData.find({
-            deviceId: deviceId,
-            patientId: patientId
-        }).sort({ _id: -1 });
+
+
+        // if (!deviceId || !patientId) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Invalid DeviceId or PatientId'
+        //     })
+        // }
+
+        // const data = await deviceData.find({
+        //     deviceId: deviceId,
+        //     patientId: patientId
+        // }).sort({ _id: -1 });
 
 
         res.status(200).json({
@@ -329,8 +344,17 @@ exports.getDeviceData = catchAsyncError(async (req, res, next) => {
 exports.addDevice = catchAsyncError(async (req, res, next) => {
     try {
 
-        let createDevice = await device.create(req.body);
+        const isDeviceExist = await device.findOne({ deviceId: req.body.deviceId })
+        
+        if (isDeviceExist) {
+            return res.status(400).json({
+                success: false,
+                message: 'Device already Exist'
+            })
+        }
 
+        let createDevice = await device.create(req.body);
+        
         if(createDevice)
         res.status(200).json({
             success: true,
@@ -380,10 +404,10 @@ exports.updateDevice = catchAsyncError(async (req, res, next) => {
     }
 })
 
-exports.getDevice = catchAsyncError(async (req, res, next) => {
+exports.getDeviceDetails = catchAsyncError(async (req, res, next) => {
     try {
 
-        let findDevice = await device.findOne({deviceId:req.params.deviceId});
+        let findDevice = await device.findOne({deviceId:req.body.deviceId});
 
         if(findDevice){
             
@@ -401,6 +425,26 @@ exports.getDevice = catchAsyncError(async (req, res, next) => {
         }
         
 
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// Get all devices - ADMIN => /api/v1/devices 
+exports.devicesList = catchAsyncError(async (req, res, next) => {
+
+    try {
+        const devices = await device.find().sort({ _id: -1 });
+
+        const deviceCount = await device.countDocuments();
+        res.status(200).json({
+            success: true,
+            deviceCount,
+            devices
+        })
     } catch (error) {
         return res.status(400).json({
             success: false,
