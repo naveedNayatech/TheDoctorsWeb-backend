@@ -2,6 +2,7 @@ const Doctor = require('../../models/doctor');
 const Patient = require('../../models/patient');
 const deviceData = require('../../models/deviceData');
 const ErrorHandler = require('../../utils/errorHandler');
+const APIFeatures = require('../../utils/apiFeatures');
 const catchAsyncError = require('../../middlewares/catchAsyncErrors');
 const sendToken = require('../../utils/jwtToken');
 const cloudinary = require('cloudinary');
@@ -246,12 +247,20 @@ exports.updatePatient = catchAsyncError(async (req, res, next) => {
 exports.doctorsList = catchAsyncError(async (req, res, next) => {
 
     try {
-        const doctors = await Doctor.find().sort({ _id: -1 });
+        const resPerPage = 5;
+
+        const apiFeatures = new APIFeatures(Doctor.find().sort({_id: -1}), req.query)
+                            .search()            
+                            .pagination(resPerPage);
+
+        const doctors = await apiFeatures.query;
 
         const doctorCount = await Doctor.countDocuments();
+
         res.status(200).json({
             success: true,
             doctorCount,
+            resPerPage,
             doctors
         })
     } catch (error) {
@@ -297,19 +306,19 @@ exports.forwardtelemetry = async (req, res) => {
 // Get device data - ADMIN => /api/v1/admin/devicedata 
 exports.getDeviceData = catchAsyncError(async (req, res, next) => {
     try {
-        const { deviceId, patientId } = req.body;
+        const { deviceId, patientId, sort } = req.body;
 
         let data;
 
         if(deviceId === null) {
              data = await deviceData.find({
                 patientId: patientId
-            }).sort({ _id: -1 });
+            }).sort({ _id: sort });
         } else {
             data = await deviceData.find({
                 deviceId: deviceId,
                 patientId: patientId
-            }).sort({ _id: -1 });
+            }).sort({ _id: sort });
         }
 
 
@@ -452,3 +461,112 @@ exports.devicesList = catchAsyncError(async (req, res, next) => {
         })
     }
 })
+
+/**
+ * get device data of a patient for a month or today
+ * @param {ObjectId/id} patientId 
+ * @param {boolean} todaysData
+ * @returns {Promise<PatientDeviceData>}
+ */
+
+// exports.getdevicedataforpatient = catchAsyncError(async (req, res, next) => {
+//     try {
+//         let PatientDeviceData;
+    
+//         if(!req.body.todaysData){
+//         //get the month and month start and end data and covert that to iso format
+//         var date = new Date();
+//         var month = date.getMonth();
+//         month++
+//         if(month < 10)
+//         month = '0' + month
+    
+//         var startdated=`2022-${month}-01T00:00:00+05:30`;
+//         var startnewdated= new Date(startdated);
+//         var startDate= startnewdated.toISOString();
+    
+//         var enddated=`2022-${month}-30T00:00:00+05:30`;
+//         var endnewdated= new Date(enddated);
+//         var endDate= endnewdated.toISOString();
+    
+    
+//          PatientDeviceData = await deviceData.find({
+//           "patientId": req.body.patientId, createdAt: {
+//             $gte: startDate,
+//             $lte: endDate
+//           }
+//         })
+//       }
+//       else{
+       
+//           //get the month and month start and end data and covert that to iso format
+//           console.log('Helloooo');
+//           var date = new Date();
+//           var month = date.getMonth();
+//           month++
+//           if(month < 10)
+//           month = '0' + month
+    
+//           var day = date.getDate();
+//           if(day < 10)
+//           day = '0' + day
+    
+      
+//           var dated=`2022-${month}-${day}T00:00:00+05:30`;
+//           var newdated= new Date(dated);
+//           var todaysDate= newdated.toISOString();
+      
+//             console.log('todaysDate is ' + todaysDate);
+//             PatientDeviceData = await deviceData.find({
+//             patientId: req.body.patientId, createdAt: '2022-01-03'
+//           })
+        
+//       }
+//         res.status(200).json({
+//             success: true,
+//             PatientDeviceData
+//         })
+
+//       } catch (error) {
+//         return res.status(400).json({
+//             success: false,
+//             message: error.message
+//         })
+//       }
+// })
+
+exports.getdevicedatabwdates = catchAsyncError(async (req, res, next) => {
+    try {
+        var startDate = new Date(req.body.date);
+        startDate.setDate(startDate.getDate() - 1)
+        console.log(startDate);
+
+        var endDate = new Date(req.body.date);
+        endDate.setDate(endDate.getDate() + 1)
+        console.log(endDate);
+
+        const data = await deviceData.find({ 
+            patientId: req.body.patientid,
+            deviceId: req.body.deviceid,
+
+            createdAt: {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate)
+            } 
+        })    
+
+        res.status(200).json({
+            success: true,
+            data
+        })
+
+
+      } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        })
+      }
+})
+
+
