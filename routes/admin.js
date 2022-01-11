@@ -15,6 +15,7 @@ const { registerDoctor,
     devicetelemetry,
     forwardtelemetry,
     getDeviceData,
+    commentDeviceData,
     addDevice,
     updateDevice,
     getDeviceDetails,
@@ -48,6 +49,9 @@ router.post('/DeviceCert', DeviceCert);
 router.post('/devicetelemetry/:deviceparam', devicetelemetry);
 router.post('/forwardtelemetry', forwardtelemetry);
 router.post('/devicedata', getDeviceData);
+
+router.post('/admin/commentdevicedata', commentDeviceData);
+
 
 
 //devices

@@ -7,6 +7,7 @@ const devicesSchema = new mongoose.Schema({
     },
     deviceId:{type:String},
     telemetaryData:{},
+    comments:{type:String},
     createdAt: {
         type: Date,
         default: Date.now,

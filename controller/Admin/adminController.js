@@ -222,6 +222,7 @@ exports.removeDevice = catchAsyncError(async (req, res, next) => {
 
         var date = new Date();
         month = date.getMonth();
+        month++
 
         await Patient.findOneAndUpdate(patientid, {initialsetup:`${month}`}, {
             new: true,
@@ -458,6 +459,24 @@ exports.getDeviceData = catchAsyncError(async (req, res, next) => {
 
 
     } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+exports.commentDeviceData = catchAsyncError(async (req, res, next) => {
+    try {
+        let addcomment = await deviceData.findOneAndUpdate(req.body.id,{$set:{comments : req.body.comment}},{new:true,upsert:true}).lean();
+
+        if(addcomment)
+        res.status(200).json({
+            success: true,
+            data : addcomment
+        })
+    }
+    catch (error) {
         return res.status(400).json({
             success: false,
             message: error.message
