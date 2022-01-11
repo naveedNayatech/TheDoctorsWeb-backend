@@ -18,17 +18,17 @@ exports.loginDoctor = catchAsyncError( async(req, res, next) => {
         }
     
         // Finding Admin in database
-        const doctor = await Doctor.findOne({ email: email, role: role }).select('+password') //because in user model we select password
+        const staff = await Doctor.findOne({ email: email, role: role }).select('+password') //because in user model we select password
     
-        if(!doctor) {
+        if(!staff) {
             return res.status(400).json({
                 success: false,
-                message: 'Doctor Not Found'
+                message: 'Staff Not Found'
                 })
         }
     
         // Checks if password is correct or not
-        const isPasswordMatched = await doctor.comparePassword(password);
+        const isPasswordMatched = await staff.comparePassword(password);
     
         if(!isPasswordMatched) {
             return res.status(400).json({
@@ -37,7 +37,7 @@ exports.loginDoctor = catchAsyncError( async(req, res, next) => {
                 })  
         }
     
-        sendToken(doctor, 200, res)
+        sendToken(staff, 200, res)
         
     } catch (error) {
         return res.status(400).json({
@@ -67,3 +67,16 @@ exports.loginDoctor = catchAsyncError( async(req, res, next) => {
         doctor
      });
 }
+
+
+exports.logoutDoctor = catchAsyncError(async (req, res, next) => {
+    res.cookie('token', null, { 
+        expires: new Date(Date.now()),
+        httpOnly: true
+    })
+
+    res.status(200).json({
+        success: true,
+        message: 'Logged Out'
+    })
+})

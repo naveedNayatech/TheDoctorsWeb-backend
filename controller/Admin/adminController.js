@@ -138,6 +138,104 @@ exports.getPatientProfile = catchAsyncError(async (req, res, next) => {
     })
 })
 
+exports.assignDevice = catchAsyncError(async (req, res, next) => {
+    const { patientid } = req.body;
+    const { deviceid } = req.body;
+
+    const patient = await Patient.findById(patientid);
+
+    if(!patient){
+        return res.status(400).json({
+            success: false,
+            message: "Patient Not Found."
+        })
+    }
+
+    const isAlreadyAssigned = await patient.deviceassigned.find(o => o.deviceid === deviceid);
+
+    if(isAlreadyAssigned) {
+        return res.status(400).json({
+            success: false,
+            message: "Device Already Assigned."
+        })
+    }
+
+    const data = {
+        deviceid: deviceid
+    }
+    
+    await patient.deviceassigned.push(data);
+
+    await patient.save({ validateBeforeSave: false })
+
+    const newDoctorData = {
+        status: true
+    }
+
+     await device.findOneAndUpdate(deviceid, newDoctorData, {
+        new: true,
+        runValidators: true,
+        useFindAndModify: true
+    })
+
+
+    res.status(200).json({
+        success: true,
+        patient
+    })
+})
+
+exports.removeDevice = catchAsyncError(async (req, res, next) => {
+    const { patientid } = req.body;
+    const { deviceid } = req.body;
+
+    const patient = await Patient.findById(patientid);
+
+    if(!patient){
+        return res.status(400).json({
+            success: false,
+            message: "Patient Not Found."
+        })
+    }
+
+
+    const isAlreadyAssigned = await patient.deviceassigned.find(o => o.deviceid === deviceid);
+
+    if(isAlreadyAssigned){
+        const data = {
+            deviceid: deviceid
+        }
+        
+        await patient.deviceassigned.pop(data);
+    
+        await patient.save({ validateBeforeSave: false })
+        
+        const newDoctorData = {
+            status: false
+        }
+    
+         await device.findOneAndUpdate(deviceid, newDoctorData, {
+            new: true,
+            runValidators: true,
+            useFindAndModify: true
+        })
+
+        res.status(200).json({
+            success: true,
+            patient
+        })
+        
+    } else {
+        res.status(200).json({
+            success: true,
+            message: 'Device Not Found'
+        })
+    }
+})
+
+
+
+
 
 // Get Doctor Profile => /api/v1/admin/doctor
 exports.getDoctorProfile = catchAsyncError(async (req, res, next) => {
@@ -218,7 +316,7 @@ exports.updatePatient = catchAsyncError(async (req, res, next) => {
             readingsperday: req.body.readingsperday,
             diseases: req.body.diseases,
             doctorid: req.body.doctorId,
-            deviceid: req.body.deviceId
+            // deviceid: req.body.deviceId
         }
 
         const patient = await Patient.findByIdAndUpdate(req.body.id, newPatientData, {
@@ -285,11 +383,25 @@ exports.devicetelemetry = async (req, res) => {
     try {
         console.log(req.params.deviceparam)
         console.log(req.body);
-        let FindPatient = await Patient.findOne({ deviceid: req.params.deviceparam }).lean()
-        console.log(FindPatient);
 
-        let insertIntoDeviceData = await deviceData.create({ patientId: FindPatient._id, deviceId: req.params.deviceparam, telemetaryData: req.body })
-        console.log(insertIntoDeviceData);
+        let patientId;
+        let FindPatient = await Patient.find({deviceassigned: { $elemMatch: {deviceid: req.params.deviceparam}}})
+        
+        FindPatient.map((patient, index) => {
+            patientId = patient._id
+        })
+
+        if(patientId === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot Find Patient'
+            })
+        } else {
+            let insertIntoDeviceData = await deviceData.create({ patientId: patientId, deviceId: req.params.deviceparam, telemetaryData: req.body })
+            console.log(insertIntoDeviceData);
+        }
+
+        
 
         res.status(200).send("data recieved  " + JSON.stringify(req.body));
     }
@@ -306,20 +418,15 @@ exports.forwardtelemetry = async (req, res) => {
 // Get device data - ADMIN => /api/v1/admin/devicedata 
 exports.getDeviceData = catchAsyncError(async (req, res, next) => {
     try {
-        const { deviceId, patientId, sort } = req.body;
+        const { patientId, sort } = req.body;
 
         let data;
 
-        if(deviceId === null) {
-             data = await deviceData.find({
-                patientId: patientId
-            }).sort({ _id: sort });
-        } else {
-            data = await deviceData.find({
-                deviceId: deviceId,
-                patientId: patientId
-            }).sort({ _id: sort });
-        }
+        
+        data = await deviceData.find({
+            patientId: patientId
+        }).sort({ _id: sort });
+        
 
 
 

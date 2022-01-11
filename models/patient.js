@@ -96,10 +96,13 @@ const patientSchema = new mongoose.Schema({
         ref: 'Doctor',
         default: null
     },
-    deviceid: {
+    deviceassigned: [
+        {
+        deviceid: {
         type: String,
-        default: null
-    }    
+        }
+      }
+    ]    
 })
 
 module.exports = mongoose.model('Patient', patientSchema);

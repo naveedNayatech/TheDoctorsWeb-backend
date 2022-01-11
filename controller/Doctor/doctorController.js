@@ -26,7 +26,7 @@ exports.registerPatient = catchAsyncError(async(req, res, next) => {
             readingsperday,
             diseases,
             doctorid,
-            deviceid 
+            deviceassigned 
         } = req.body;
 
         const isPatientExist = await Patient.findOne({ email: email});
@@ -59,7 +59,7 @@ exports.registerPatient = catchAsyncError(async(req, res, next) => {
             readingsperday,
             diseases,
             doctorid,
-            deviceid
+            deviceassigned
         })
 
 
