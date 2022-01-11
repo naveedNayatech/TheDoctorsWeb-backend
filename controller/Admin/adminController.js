@@ -220,6 +220,14 @@ exports.removeDevice = catchAsyncError(async (req, res, next) => {
             useFindAndModify: true
         })
 
+        var date = new Date();
+        month = date.getMonth();
+
+        await Patient.findOneAndUpdate(patientid, {initialsetup:`${month}`}, {
+            new: true,
+           
+        })
+
         res.status(200).json({
             success: true,
             patient
