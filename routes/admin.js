@@ -22,7 +22,8 @@ const { registerDoctor,
     devicesList,
     getdevicedatabwdates,
     assignDevice,
-    removeDevice
+    removeDevice,
+    getuserbydeviceid
 } = require('../controller/Admin/adminController');
 const { loginDoctor, logoutDoctor } = require('../controller/Doctor/authController');
 const { registerPatient } = require('../controller/Doctor/doctorController');
@@ -51,6 +52,8 @@ router.post('/forwardtelemetry', forwardtelemetry);
 router.post('/devicedata', getDeviceData);
 
 router.post('/admin/commentdevicedata', commentDeviceData);
+
+router.post('/getuserbydeviceid', getuserbydeviceid)
 
 
 

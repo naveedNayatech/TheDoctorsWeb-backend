@@ -468,7 +468,7 @@ exports.getDeviceData = catchAsyncError(async (req, res, next) => {
 
 exports.commentDeviceData = catchAsyncError(async (req, res, next) => {
     try {
-        let addcomment = await deviceData.findOneAndUpdate(req.body.id,{$set:{comments : req.body.comment}},{new:true,upsert:true}).lean();
+        let addcomment = await deviceData.findByIdAndUpdate(req.body.id,{$set:{comments : req.body.comment}},{new:true,upsert:true}).lean();
 
         if(addcomment)
         res.status(200).json({
@@ -692,6 +692,32 @@ exports.getdevicedatabwdates = catchAsyncError(async (req, res, next) => {
         res.status(200).json({
             success: true,
             data
+        })
+
+
+      } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        })
+      }
+})
+
+
+exports.getuserbydeviceid = catchAsyncError(async (req, res, next) => {
+    try {
+        if(req.body.deviceId)
+        var userDetails = await Patient.findOne({"deviceassigned.deviceid":req.body.deviceId}).lean()
+
+        if(userDetails)
+        res.status(200).json({
+            success: true,
+            userDetails
+        })
+        else
+        res.status(200).json({
+            success: false,
+            message: "No user with this device"
         })
 
 
