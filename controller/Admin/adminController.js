@@ -523,7 +523,7 @@ exports.updateDevice = catchAsyncError(async (req, res, next) => {
 let thispatient;
         let findDevice = await device.findOne({ _id: req.params.deviceId });
         if (findDevice)
-        thispatient = await patient.findById(findDevice.assigned_patient_id)
+        thispatient = await patient.findById(req.body.assigned_patient_id)
         if (thispatient) {
             thispatient.deviceassigned.push({ deviceid: findDevice.deviceId })
             Object.assign(thispatient, thispatient);
