@@ -35,7 +35,7 @@ router.route('/adminlogout').get(logoutAdmin);
 router.route('/admin/registerdoctor').post(registerDoctor);
 router.route('/login').post(loginDoctor);
 router.route('/stafflogout').get(logoutDoctor);
-router.route('/admin/registerpatient').post(isAuthenticatedUser, registerPatient);
+router.route('/admin/registerpatient').post( registerPatient);
 router.route('/admin/patientslist').get(patientsList);
 router.route('/admin/patient').post(getPatientProfile);
 router.route('/admin/patient').put(updatePatient);

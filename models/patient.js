@@ -19,7 +19,7 @@ const patientSchema = new mongoose.Schema({
         type: String,
         required: [false, 'Please enter patient email'],
         maxLength:[25, 'Patient email should not be greater than 30 characters'],
-        unique: false,  
+          
         validate: [validator.isEmail, 'Please enter valid email adddress'],
     },
     gender: {
@@ -102,7 +102,19 @@ const patientSchema = new mongoose.Schema({
         type: String,
         }
       }
-    ]    
+    ],
+    ssn:{
+        type:String
+    },
+    zipCode:{
+        type:String
+    },
+    DOB:{
+        type:String
+    },
+    address:{
+        type:String
+    }
 })
 
 module.exports = mongoose.model('Patient', patientSchema);
