@@ -114,7 +114,17 @@ const patientSchema = new mongoose.Schema({
     },
     address:{
         type:String
+    },
+    state:{
+        type:String
+    },
+    city:{
+        type:String
+    },
+    line2:{
+        type:String
     }
+    
 })
 
 module.exports = mongoose.model('Patient', patientSchema);

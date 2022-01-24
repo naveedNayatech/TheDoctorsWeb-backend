@@ -8,6 +8,7 @@ const sendToken = require('../../utils/jwtToken');
 const cloudinary = require('cloudinary');
 const sendEmail = require('../../utils/sendEmail');
 const device = require('../../models/device');
+const patient = require('../../models/patient');
 
 
 exports.registerDoctor = catchAsyncError(async (req, res, next) => {
@@ -144,7 +145,7 @@ exports.assignDevice = catchAsyncError(async (req, res, next) => {
 
     const patient = await Patient.findById(patientid);
 
-    if(!patient){
+    if (!patient) {
         return res.status(400).json({
             success: false,
             message: "Patient Not Found."
@@ -153,7 +154,7 @@ exports.assignDevice = catchAsyncError(async (req, res, next) => {
 
     const isAlreadyAssigned = await patient.deviceassigned.find(o => o.deviceid === deviceid);
 
-    if(isAlreadyAssigned) {
+    if (isAlreadyAssigned) {
         return res.status(400).json({
             success: false,
             message: "Device Already Assigned."
@@ -163,7 +164,7 @@ exports.assignDevice = catchAsyncError(async (req, res, next) => {
     const data = {
         deviceid: deviceid
     }
-    
+
     await patient.deviceassigned.push(data);
 
     await patient.save({ validateBeforeSave: false })
@@ -172,7 +173,7 @@ exports.assignDevice = catchAsyncError(async (req, res, next) => {
         status: true
     }
 
-     await device.findOneAndUpdate(deviceid, newDoctorData, {
+    await device.findOneAndUpdate(deviceid, newDoctorData, {
         new: true,
         runValidators: true,
         useFindAndModify: true
@@ -191,7 +192,7 @@ exports.removeDevice = catchAsyncError(async (req, res, next) => {
 
     const patient = await Patient.findById(patientid);
 
-    if(!patient){
+    if (!patient) {
         return res.status(400).json({
             success: false,
             message: "Patient Not Found."
@@ -201,20 +202,20 @@ exports.removeDevice = catchAsyncError(async (req, res, next) => {
 
     const isAlreadyAssigned = await patient.deviceassigned.find(o => o.deviceid === deviceid);
 
-    if(isAlreadyAssigned){
+    if (isAlreadyAssigned) {
         const data = {
             deviceid: deviceid
         }
-        
+
         await patient.deviceassigned.pop(data);
-    
+
         await patient.save({ validateBeforeSave: false })
-        
+
         const newDoctorData = {
             status: false
         }
-    
-         await device.findOneAndUpdate(deviceid, newDoctorData, {
+
+        await device.findOneAndUpdate(deviceid, newDoctorData, {
             new: true,
             runValidators: true,
             useFindAndModify: true
@@ -224,16 +225,16 @@ exports.removeDevice = catchAsyncError(async (req, res, next) => {
         month = date.getMonth();
         month++
 
-        await Patient.findOneAndUpdate(patientid, {initialsetup:`${month}`}, {
+        await Patient.findOneAndUpdate(patientid, { initialsetup: `${month}` }, {
             new: true,
-           
+
         })
 
         res.status(200).json({
             success: true,
             patient
         })
-        
+
     } else {
         res.status(200).json({
             success: true,
@@ -356,9 +357,9 @@ exports.doctorsList = catchAsyncError(async (req, res, next) => {
     try {
         const resPerPage = 5;
 
-        const apiFeatures = new APIFeatures(Doctor.find().sort({_id: -1}), req.query)
-                            .search()            
-                            .pagination(resPerPage);
+        const apiFeatures = new APIFeatures(Doctor.find().sort({ _id: -1 }), req.query)
+            .search()
+            .pagination(resPerPage);
 
         const doctors = await apiFeatures.query;
 
@@ -394,13 +395,13 @@ exports.devicetelemetry = async (req, res) => {
         console.log(req.body);
 
         let patientId;
-        let FindPatient = await Patient.find({deviceassigned: { $elemMatch: {deviceid: req.params.deviceparam}}})
-        
+        let FindPatient = await Patient.find({ deviceassigned: { $elemMatch: { deviceid: req.params.deviceparam } } })
+
         FindPatient.map((patient, index) => {
             patientId = patient._id
         })
 
-        if(patientId === undefined) {
+        if (patientId === undefined) {
             return res.status(400).json({
                 success: false,
                 message: 'Cannot Find Patient'
@@ -410,7 +411,7 @@ exports.devicetelemetry = async (req, res) => {
             console.log(insertIntoDeviceData);
         }
 
-        
+
 
         res.status(200).send("data recieved  " + JSON.stringify(req.body));
     }
@@ -431,11 +432,11 @@ exports.getDeviceData = catchAsyncError(async (req, res, next) => {
 
         let data;
 
-        
+
         data = await deviceData.find({
             patientId: patientId
         }).sort({ _id: sort });
-        
+
 
 
 
@@ -468,13 +469,13 @@ exports.getDeviceData = catchAsyncError(async (req, res, next) => {
 
 exports.commentDeviceData = catchAsyncError(async (req, res, next) => {
     try {
-        let addcomment = await deviceData.findByIdAndUpdate(req.body.id,{$set:{comments : req.body.comment}},{new:true,upsert:true}).lean();
+        let addcomment = await deviceData.findByIdAndUpdate(req.body.id, { $set: { comments: req.body.comment } }, { new: true, upsert: true }).lean();
 
-        if(addcomment)
-        res.status(200).json({
-            success: true,
-            data : addcomment
-        })
+        if (addcomment)
+            res.status(200).json({
+                success: true,
+                data: addcomment
+            })
     }
     catch (error) {
         return res.status(400).json({
@@ -488,7 +489,7 @@ exports.addDevice = catchAsyncError(async (req, res, next) => {
     try {
 
         const isDeviceExist = await device.findOne({ deviceId: req.body.deviceId })
-        
+
         if (isDeviceExist) {
             return res.status(400).json({
                 success: false,
@@ -497,17 +498,17 @@ exports.addDevice = catchAsyncError(async (req, res, next) => {
         }
 
         let createDevice = await device.create(req.body);
-        
-        if(createDevice)
-        res.status(200).json({
-            success: true,
-            createDevice
-        })
+
+        if (createDevice)
+            res.status(200).json({
+                success: true,
+                createDevice
+            })
         else
-        return res.status(400).json({
-            success: false,
-            message: "cannot create device"
-        })
+            return res.status(400).json({
+                success: false,
+                message: "cannot create device"
+            })
 
     } catch (error) {
         return res.status(400).json({
@@ -519,10 +520,16 @@ exports.addDevice = catchAsyncError(async (req, res, next) => {
 
 exports.updateDevice = catchAsyncError(async (req, res, next) => {
     try {
-
-        let findDevice = await device.findOne({_id:req.params.deviceId});
-
-        if(findDevice){
+let thispatient;
+        let findDevice = await device.findOne({ _id: req.params.deviceId });
+        if (findDevice)
+        thispatient = await patient.findById(findDevice.assigned_patient_id)
+        if (thispatient) {
+            thispatient.deviceassigned.push({ deviceid: findDevice.deviceId })
+            Object.assign(thispatient, thispatient);
+            await thispatient.save();
+        }
+        if (findDevice) {
             Object.assign(findDevice, req.body);
             await findDevice.save();
             res.status(200).json({
@@ -530,14 +537,14 @@ exports.updateDevice = catchAsyncError(async (req, res, next) => {
                 findDevice
             })
         }
-       
-        else{
+
+        else {
             return res.status(400).json({
                 success: false,
                 message: "cannot find device"
             })
         }
-        
+
 
     } catch (error) {
         return res.status(400).json({
@@ -550,23 +557,23 @@ exports.updateDevice = catchAsyncError(async (req, res, next) => {
 exports.getDeviceDetails = catchAsyncError(async (req, res, next) => {
     try {
 
-        let findDevice = await device.findOne({deviceId:req.body.deviceId});
+        let findDevice = await device.findOne({ deviceId: req.body.deviceId });
 
-        if(findDevice){
-            
+        if (findDevice) {
+
             res.status(200).json({
                 success: true,
                 findDevice
             })
         }
-       
-        else{
+
+        else {
             return res.status(400).json({
                 success: false,
                 message: "cannot find device"
             })
         }
-        
+
 
     } catch (error) {
         return res.status(400).json({
@@ -606,7 +613,7 @@ exports.devicesList = catchAsyncError(async (req, res, next) => {
 // exports.getdevicedataforpatient = catchAsyncError(async (req, res, next) => {
 //     try {
 //         let PatientDeviceData;
-    
+
 //         if(!req.body.todaysData){
 //         //get the month and month start and end data and covert that to iso format
 //         var date = new Date();
@@ -614,16 +621,16 @@ exports.devicesList = catchAsyncError(async (req, res, next) => {
 //         month++
 //         if(month < 10)
 //         month = '0' + month
-    
+
 //         var startdated=`2022-${month}-01T00:00:00+05:30`;
 //         var startnewdated= new Date(startdated);
 //         var startDate= startnewdated.toISOString();
-    
+
 //         var enddated=`2022-${month}-30T00:00:00+05:30`;
 //         var endnewdated= new Date(enddated);
 //         var endDate= endnewdated.toISOString();
-    
-    
+
+
 //          PatientDeviceData = await deviceData.find({
 //           "patientId": req.body.patientId, createdAt: {
 //             $gte: startDate,
@@ -632,7 +639,7 @@ exports.devicesList = catchAsyncError(async (req, res, next) => {
 //         })
 //       }
 //       else{
-       
+
 //           //get the month and month start and end data and covert that to iso format
 //           console.log('Helloooo');
 //           var date = new Date();
@@ -640,21 +647,21 @@ exports.devicesList = catchAsyncError(async (req, res, next) => {
 //           month++
 //           if(month < 10)
 //           month = '0' + month
-    
+
 //           var day = date.getDate();
 //           if(day < 10)
 //           day = '0' + day
-    
-      
+
+
 //           var dated=`2022-${month}-${day}T00:00:00+05:30`;
 //           var newdated= new Date(dated);
 //           var todaysDate= newdated.toISOString();
-      
+
 //             console.log('todaysDate is ' + todaysDate);
 //             PatientDeviceData = await deviceData.find({
 //             patientId: req.body.patientId, createdAt: '2022-01-03'
 //           })
-        
+
 //       }
 //         res.status(200).json({
 //             success: true,
@@ -679,15 +686,15 @@ exports.getdevicedatabwdates = catchAsyncError(async (req, res, next) => {
         endDate.setDate(endDate.getDate() + 1)
         console.log(endDate);
 
-        const data = await deviceData.find({ 
+        const data = await deviceData.find({
             patientId: req.body.patientid,
             deviceId: req.body.deviceid,
 
             createdAt: {
                 $gte: new Date(startDate),
                 $lte: new Date(endDate)
-            } 
-        })    
+            }
+        })
 
         res.status(200).json({
             success: true,
@@ -695,38 +702,38 @@ exports.getdevicedatabwdates = catchAsyncError(async (req, res, next) => {
         })
 
 
-      } catch (error) {
+    } catch (error) {
         return res.status(400).json({
             success: false,
             message: error.message
         })
-      }
+    }
 })
 
 
 exports.getuserbydeviceid = catchAsyncError(async (req, res, next) => {
     try {
-        if(req.body.deviceId)
-        var userDetails = await Patient.findOne({"deviceassigned.deviceid":req.body.deviceId}).lean()
+        if (req.body.deviceId)
+            var userDetails = await Patient.findOne({ "deviceassigned.deviceid": req.body.deviceId }).lean()
 
-        if(userDetails)
-        res.status(200).json({
-            success: true,
-            userDetails
-        })
+        if (userDetails)
+            res.status(200).json({
+                success: true,
+                userDetails
+            })
         else
-        res.status(200).json({
-            success: false,
-            message: "No user with this device"
-        })
+            res.status(200).json({
+                success: false,
+                message: "No user with this device"
+            })
 
 
-      } catch (error) {
+    } catch (error) {
         return res.status(400).json({
             success: false,
             message: error.message
         })
-      }
+    }
 })
 
 
