@@ -4,11 +4,11 @@ const validator = require('validator');
 const patientSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: false
     },
     firstname: {
         type: String,
-        required: [true, 'Please enter first name'],
+        required: [false, 'Please enter first name'],
         maxLength:[25, 'First name should not be greater than 25 characters']
     },
     lastname:{
@@ -17,18 +17,18 @@ const patientSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: [true, 'Please enter patient email'],
+        required: [false, 'Please enter patient email'],
         maxLength:[25, 'Patient email should not be greater than 30 characters'],
-        unique: true,  
+        unique: false,  
         validate: [validator.isEmail, 'Please enter valid email adddress'],
     },
     gender: {
         type: String,
-        required: [true, 'Please enter doctor gender'],
+        required: [false, 'Please enter doctor gender'],
     },
     contactno: {
         type: String,
-        required: [true, 'Please enter patient contact number'],
+        required: [false, 'Please enter patient contact number'],
         minlength: [8, 'Contact number should not be less than 8 characters']
     },
     phone1: {
@@ -41,7 +41,7 @@ const patientSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-        required: [true, 'Please enter patient address'],
+        required: [false, 'Please enter patient address'],
     },
     insurancecompany: [
         {
@@ -89,7 +89,7 @@ const patientSchema = new mongoose.Schema({
     },
     readingsperday: {
         type: Number,
-        required: true
+        required: false
     },
     doctorid: {
         type: mongoose.Schema.ObjectId,
