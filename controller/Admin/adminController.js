@@ -520,7 +520,7 @@ exports.addDevice = catchAsyncError(async (req, res, next) => {
 exports.updateDevice = catchAsyncError(async (req, res, next) => {
     try {
 
-        let findDevice = await device.findOne({deviceId:req.params.deviceId});
+        let findDevice = await device.findOne({_id:req.params.deviceId});
 
         if(findDevice){
             Object.assign(findDevice, req.body);
